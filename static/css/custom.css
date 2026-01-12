@@ -1,0 +1,63 @@
+/* Custom styles for FilmNeo */
+.movie-poster img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+.rating-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid #4CAF50;
+    color: #333;
+}
+
+.similar-movie {
+    transition: transform 0.3s ease;
+}
+
+.similar-movie:hover {
+    transform: translateY(-5px);
+}
+
+.product__item__pic {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.product__item__pic .view {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+.backdrop-image {
+    position: relative;
+}
+
+.backdrop-image::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.7));
+}
+
+.set-bg {
+    background-size: cover !important;
+    background-position: center !important;
+    transition: transform 0.3s ease;
+}
+
+.set-bg:hover {
+    transform: scale(1.05);
+}

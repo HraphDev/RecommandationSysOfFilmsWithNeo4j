@@ -1,0 +1,371 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ movie.title }} - FilmNeo{% endblock %}
+
+{% block content %}
+<!-- Movie Detail Section Begin -->
+<section class="movie-detail spad">
+    <div class="container">
+        <div class="row">
+            <!-- Back button -->
+            <div class="col-lg-12 mb-4">
+                <a href="javascript:history.back()" class="btn btn-outline-light">
+                    <i class="fa fa-arrow-left"></i> Retour
+                </a>
+            </div>
+            
+            <!-- Movie Poster and Basic Info -->
+            <div class="col-lg-4 col-md-5">
+                <div class="movie__poster">
+                    <div class="movie__poster__pic">
+                        {% if movie.poster_url %}
+                            <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" class="img-fluid rounded">
+                        {% else %}
+                            <div class="no-poster bg-dark text-center p-5 rounded">
+                                <i class="fa fa-film fa-5x text-light"></i>
+                                <p class="mt-3 text-light">Affiche non disponible</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Rating -->
+                    <div class="movie__rating mt-3 text-light">
+                        <div class="d-flex align-items-center">
+                            <div class="rating-circle {% if movie.rating >= 7.5 %}high-rating{% elif movie.rating >= 5 %}medium-rating{% else %}low-rating{% endif %}">
+                                {{ movie.rating }}
+                            </div>
+                            <div class="ms-3">
+                                <h5 class="mb-0 text-light">Note moyenne</h5>
+                                <small class="text-light">{{ movie.vote_count|intcomma }} votes</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Stats -->
+                    <div class="movie__stats mt-4 text-light">
+                        <div class="stat-item mb-2">
+                            <i class="fa fa-calendar me-2 text-light"></i>
+                            <span class="text-light">Sortie: {{ movie.year }}</span>
+                        </div>
+                        {% if movie.runtime %}
+                        <div class="stat-item mb-2">
+                            <i class="fa fa-clock me-2 text-light"></i>
+                            <span class="text-light">Durée: {{ movie.runtime }} minutes</span>
+                        </div>
+                        {% endif %}
+                        <div class="stat-item mb-2">
+                            <i class="fa fa-globe me-2 text-light"></i>
+                            <span class="text-light">Langue: {{ movie.original_language|upper }}</span>
+                        </div>
+                        {% if movie.adult %}
+                        <div class="stat-item mb-2">
+                            <i class="fa fa-exclamation-triangle text-warning me-2"></i>
+                            <span class="text-light">Contenu pour adultes</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Links -->
+                    {% if links.imdb_url %}
+                    <div class="movie__links mt-4">
+                        <a href="{{ links.imdb_url }}" target="_blank" class="btn btn-warning w-100 mb-2">
+                            <i class="fa fa-imdb"></i> Voir sur IMDB
+                        </a>
+                        {% if user.is_authenticated %}
+                        <button class="btn btn-outline-light w-100 mb-2" id="addToFavorites">
+                            <i class="fa fa-heart text-light"></i> <span class="text-light">Ajouter aux favoris</span>
+                        </button>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Movie Details -->
+            <div class="col-lg-8 col-md-7">
+                <div class="movie__details">
+                    <div class="movie__details__title">
+                        <h2 class="text-light">{{ movie.title }}</h2>
+                        {% if movie.tagline %}
+                        <p class="text-light italic">{{ movie.tagline }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Genres -->
+                    {% if movie.genres %}
+                    <div class="movie__genres mb-4">
+                        {% for genre in movie.genres %}
+                        <span class="badge bg-primary me-1 mb-1">{{ genre }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Synopsis -->
+                    {% if movie.overview %}
+                    <div class="movie__synopsis mb-4">
+                        <h4 class="text-light">Synopsis</h4>
+                        <p class="text-light">{{ movie.overview }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Cast -->
+                    {% if cast %}
+                    <div class="movie__cast mb-4">
+                        <h4 class="text-light">Distribution principale</h4>
+                        <div class="row">
+                            {% for actor in cast %}
+                            <div class="col-6 col-md-4 col-lg-3 mb-3">
+                                <div class="cast-card text-center">
+                                    {% if actor.profile_path %}
+                                    <img src="{{ actor.profile_path }}" alt="{{ actor.name }}" class="img-fluid rounded-circle mb-2" style="width: 80px; height: 80px; object-fit: cover;">
+                                    {% else %}
+                                    <div class="no-photo rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 80px; height: 80px; background: #333;">
+                                        <i class="fa fa-user text-light"></i>
+                                    </div>
+                                    {% endif %}
+                                    <h6 class="mb-0 text-light">{{ actor.name }}</h6>
+                                    <small class="text-light">{{ actor.character }}</small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Crew -->
+                    {% if crew.directors or crew.writers %}
+                    <div class="movie__crew mb-4">
+                        <h4 class="text-light">Équipe technique</h4>
+                        <div class="row">
+                            {% if crew.directors %}
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-light">Réalisateur{% if crew.directors|length > 1 %}s{% endif %}</h6>
+                                <ul class="list-unstyled">
+                                    {% for director in crew.directors %}
+                                    <li class="text-light">{{ director.name }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+                            {% if crew.writers %}
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-light">Scénariste{% if crew.writers|length > 1 %}s{% endif %}</h6>
+                                <ul class="list-unstyled">
+                                    {% for writer in crew.writers %}
+                                    <li class="text-light">{{ writer.name }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Keywords -->
+                    {% if keywords %}
+                    <div class="movie__keywords mb-4">
+                        <h4 class="text-light">Mots-clés</h4>
+                        <div class="d-flex flex-wrap">
+                            {% for keyword in keywords %}
+                            <span class="badge bg-secondary me-1 mb-1">{{ keyword }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Financial Info -->
+                    {% if movie.budget or movie.revenue %}
+                    <div class="movie__financial mb-4">
+                        <h4 class="text-light">Informations financières</h4>
+                        <div class="row">
+                            {% if movie.budget %}
+                            <div class="col-md-6">
+                                <div class="card bg-dark border-secondary">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-light">Budget</h6>
+                                        <p class="card-text h5 text-light">${{ movie.budget|intcomma }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if movie.revenue %}
+                            <div class="col-md-6">
+                                <div class="card bg-dark border-secondary">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-light">Recettes</h6>
+                                        <p class="card-text h5 text-light">${{ movie.revenue|intcomma }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Similar Movies Section -->
+        {% if similar_movies %}
+        <div class="row mt-5">
+            <div class="col-lg-12">
+                <div class="section-title">
+                    <h4 class="text-light">Films similaires</h4>
+                </div>
+            </div>
+            {% for similar in similar_movies %}
+            <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+                <div class="product__item">
+                    <a href="{% url 'movie_detail' similar.id %}">
+                        <div class="product__item__pic set-bg" data-setbg="{{ similar.poster_url }}">
+                            <div class="view text-light"><i class="fa fa-star"></i> {{ similar.rating }}</div>
+                        </div>
+                    </a>
+                    <div class="product__item__text">
+                        <h6 class="mb-1">
+                            <a href="{% url 'movie_detail' similar.id %}" class="text-truncate d-block text-light">
+                                {{ similar.title }}
+                            </a>
+                        </h6>
+                        <small class="text-light">{{ similar.year }}</small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+<!-- Movie Detail Section End -->
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        color: #ffffff;
+    }
+    
+    .rating-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.2rem;
+        color: #ffffff;
+    }
+    
+    .high-rating {
+        background: linear-gradient(45deg, #f7b731, #f0932b);
+        color: #000000;
+    }
+    
+    .medium-rating {
+        background: linear-gradient(45deg, #686de0, #4834d4);
+        color: #ffffff;
+    }
+    
+    .low-rating {
+        background: linear-gradient(45deg, #eb4d4b, #ff7979);
+        color: #ffffff;
+    }
+    
+    .stat-item {
+        padding: 8px 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 5px;
+        color: #ffffff;
+    }
+    
+    .cast-card {
+        transition: transform 0.3s;
+    }
+    
+    .cast-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .no-photo {
+        background: #2c3e50;
+    }
+    
+    .italic {
+        font-style: italic;
+    }
+    
+    .no-poster {
+        min-height: 500px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+    }
+    
+    .set-bg {
+        position: relative;
+        background-size: cover;
+        background-position: center;
+        min-height: 300px;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+    
+    .set-bg .view {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 5px 10px;
+        border-radius: 3px;
+        font-size: 0.9rem;
+        color: #ffffff;
+    }
+    
+    .text-light {
+        color: #ffffff !important;
+    }
+    
+    .text-muted {
+        color: #cccccc !important;
+    }
+    
+    .btn-outline-light {
+        color: #ffffff;
+        border-color: #ffffff;
+    }
+    
+    .btn-outline-light:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+    }
+    
+    a.text-light:hover {
+        color: #f8f9fa !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Set background images for posters
+    $('.set-bg').each(function() {
+        var bg = $(this).data('setbg');
+        if (bg) {
+            $(this).css('background-image', 'url("' + bg + '")');
+        }
+    });
+    
+    // Add to favorites functionality
+    $('#addToFavorites').click(function() {
+        // Implement favorite functionality here
+        alert('Fonctionnalité "Ajouter aux favoris" à implémenter');
+    });
+});
+</script>
+{% endblock %}

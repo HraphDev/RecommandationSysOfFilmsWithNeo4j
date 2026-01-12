@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Connexion - FilmNeo{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-sign-in-alt"></i> Connexion</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{% url 'login' %}">
+                    {% csrf_token %}
+                    
+                    <!-- FIXED: Changed from 'username' to 'username_or_email' -->
+                    <div class="mb-3">
+                        <label for="username_or_email" class="form-label">Nom d'utilisateur ou Email</label>
+                        <input type="text" class="form-control" id="username_or_email" 
+                               name="username_or_email" required 
+                               placeholder="Entrez votre nom d'utilisateur ou email">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Mot de passe</label>
+                        <input type="password" class="form-control" id="password" 
+                               name="password" required
+                               placeholder="Entrez votre mot de passe">
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="remember_me" name="remember_me">
+                        <label class="form-check-label" for="remember_me">
+                            Se souvenir de moi
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-sign-in-alt"></i> Se connecter
+                    </button>
+                </form>
+                
+                <hr class="my-4">
+                
+                <p class="text-center mb-2">
+                    <a href="#" class="text-primary">Mot de passe oublié?</a>
+                </p>
+                <p class="text-center mb-0">
+                    Pas encore de compte? 
+                    <a href="{% url 'register' %}" class="text-primary">Inscrivez-vous</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

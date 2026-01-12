@@ -1,0 +1,611 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Films - FilmNeo{% endblock %}
+
+{% block content %}
+<!-- Movies List Section Begin -->
+<section class="movies-list spad">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="row mb-5">
+            <div class="col-lg-12">
+                <div class="section-title">
+                    <h2 class="text-white">Tous les Films</h2>
+                    <p class="mt-2 text-white">Découvrez notre collection complète de films</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <div class="row mb-5">
+            <div class="col-lg-12">
+                <div class="card bg-dark border-secondary">
+                    <div class="card-body">
+                        <form method="get" action="{% url 'movies_list' %}" class="row g-3">
+                            <div class="col-md-8">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-secondary border-secondary text-white">
+                                        <i class="fa fa-search"></i>
+                                    </span>
+                                    <input type="text" 
+                                           name="search" 
+                                           class="form-control bg-dark text-white border-secondary search-input" 
+                                           placeholder="Rechercher un film..."
+                                           value="{{ search_query }}">
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <select name="genre" class="form-select border-secondary genre-select">
+                                    <option value="">Tous les genres</option>
+                                    {% for genre in all_genres %}
+                                    <option value="{{ genre }}" 
+                                            {% if selected_genre == genre %}selected{% endif %}>
+                                        {{ genre }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-1">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fa fa-filter"></i>
+                                </button>
+                            </div>
+                        </form>
+                        
+                        {% if search_query or selected_genre %}
+                        <div class="mt-3">
+                            <small class="text-white-50">
+                                {% if search_query and selected_genre %}
+                                    Recherche: "{{ search_query }}" | Genre: {{ selected_genre }}
+                                {% elif search_query %}
+                                    Recherche: "{{ search_query }}"
+                                {% elif selected_genre %}
+                                    Genre: {{ selected_genre }}
+                                {% endif %}
+                                {% if movies %}
+                                    | {{ movies|length }} film(s) trouvé(s)
+                                {% endif %}
+                            </small>
+                            <a href="{% url 'movies_list' %}" class="btn btn-sm btn-outline-light ms-3">
+                                <i class="fa fa-times"></i> Effacer les filtres
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Movies Grid -->
+        {% if movies %}
+        <div class="row">
+            {% for movie in movies %}
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-4">
+                <div class="movie-card">
+                    <div class="movie-card__poster">
+                        <a href="{% url 'movie_detail' movie.id %}">
+                            {% if movie.poster_url %}
+                            <img src="{{ movie.poster_url }}" 
+                                 alt="{{ movie.title }}" 
+                                 class="img-fluid rounded">
+                            {% else %}
+                            <div class="no-poster bg-dark text-center p-4 rounded d-flex align-items-center justify-content-center" 
+                                 style="height: 400px;">
+                                <div>
+                                    <i class="fa fa-film fa-3x text-muted"></i>
+                                    <p class="mt-2 text-white">Affiche non disponible</p>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </a>
+                        
+                        <!-- Movie Rating -->
+                        <div class="movie-rating">
+                            <span class="rating-badge {% if movie.rating >= 7.5 %}high{% elif movie.rating >= 5 %}medium{% else %}low{% endif %}">
+                                {{ movie.rating }}
+                            </span>
+                        </div>
+                        
+                        <!-- Quick Actions -->
+                        {% if user.is_authenticated %}
+                        <div class="movie-actions">
+                            <button class="action-btn favorite-btn" 
+                                    data-movie-id="{{ movie.id }}"
+                                    title="Ajouter aux favoris">
+                                <i class="fa fa-heart-o"></i>
+                            </button>
+                            <button class="action-btn watchlist-btn" 
+                                    data-movie-id="{{ movie.id }}"
+                                    title="Ajouter à la watchlist">
+                                <i class="fa fa-plus"></i>
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="movie-card__content mt-3">
+                        <h5 class="mb-1">
+                            <a href="{% url 'movie_detail' movie.id %}" class="text-decoration-none text-white">
+                                {{ movie.title|truncatechars:40 }}
+                            </a>
+                        </h5>
+                        
+                        <div class="movie-meta d-flex justify-content-between mb-2">
+                            <span class="text-white-50">
+                                <i class="fa fa-calendar me-1"></i>{{ movie.year }}
+                            </span>
+                            {% if movie.genres %}
+                            <span class="text-white-50">
+                                <i class="fa fa-tags me-1"></i>{{ movie.genres|first }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        {% if movie.overview %}
+                        <p class="movie-overview text-white-50 small">
+                            {{ movie.overview|truncatechars:120 }}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if total_pages > 1 %}
+        <div class="row mt-5">
+            <div class="col-lg-12">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        <!-- First & Previous -->
+                        <li class="page-item {% if not has_previous %}disabled{% endif %}">
+                            <a class="page-link bg-dark border-secondary text-white" 
+                               href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_genre %}&genre={{ selected_genre }}{% endif %}">
+                                <i class="fa fa-angle-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item {% if not has_previous %}disabled{% endif %}">
+                            <a class="page-link bg-dark border-secondary text-white" 
+                               href="?page={{ current_page|add:-1 }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_genre %}&genre={{ selected_genre }}{% endif %}">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        </li>
+                        
+                        <!-- Page Numbers -->
+                        {% for page_num in page_range %}
+                        <li class="page-item {% if page_num == current_page %}active{% endif %}">
+                            <a class="page-link bg-dark border-secondary text-white" 
+                               href="?page={{ page_num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_genre %}&genre={{ selected_genre }}{% endif %}">
+                                {{ page_num }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                        
+                        <!-- Next & Last -->
+                        <li class="page-item {% if not has_next %}disabled{% endif %}">
+                            <a class="page-link bg-dark border-secondary text-white" 
+                               href="?page={{ current_page|add:1 }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_genre %}&genre={{ selected_genre }}{% endif %}">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item {% if not has_next %}disabled{% endif %}">
+                            <a class="page-link bg-dark border-secondary text-white" 
+                               href="?page={{ total_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_genre %}&genre={{ selected_genre }}{% endif %}">
+                                <i class="fa fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <!-- Page Info -->
+                    <div class="text-center mt-2 text-white-50">
+                        Page {{ current_page }} sur {{ total_pages }} | 
+                        {{ total_count|intcomma }} film(s) au total
+                    </div>
+                </nav>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <!-- No Results -->
+        <div class="row mt-5">
+            <div class="col-lg-12 text-center">
+                <div class="no-results py-5">
+                    <i class="fa fa-film fa-4x text-muted mb-3"></i>
+                    <h4 class="text-white mb-3">Aucun film trouvé</h4>
+                    <p class="text-white-50">
+                        {% if search_query or selected_genre %}
+                        Aucun résultat pour votre recherche.
+                        <a href="{% url 'movies_list' %}" class="text-primary">Voir tous les films</a>
+                        {% else %}
+                        Aucun film disponible pour le moment.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+<!-- Movies List Section End -->
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .movies-list {
+        min-height: 70vh;
+    }
+
+    .section-title h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+    }
+
+    .section-title p {
+        font-size: 1.1rem;
+        opacity: 0.8;
+    }
+
+    .movie-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+        height: 100%;
+    }
+    
+    .movie-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(247, 183, 49, 0.3);
+    }
+    
+    .movie-card__poster {
+        position: relative;
+        overflow: hidden;
+        border-radius: 8px;
+    }
+    
+    .movie-card__poster img {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+        transition: transform 0.5s;
+    }
+    
+    .movie-card:hover .movie-card__poster img {
+        transform: scale(1.05);
+    }
+    
+    .rating-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.9rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+    
+    .rating-badge.high {
+        background: linear-gradient(45deg, #f7b731, #f0932b);
+        color: #000;
+    }
+    
+    .rating-badge.medium {
+        background: linear-gradient(45deg, #686de0, #4834d4);
+        color: #fff;
+    }
+    
+    .rating-badge.low {
+        background: linear-gradient(45deg, #eb4d4b, #ff7979);
+        color: #fff;
+    }
+    
+    .movie-actions {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        display: flex;
+        gap: 5px;
+    }
+    
+    .movie-card:hover .movie-actions {
+        opacity: 1;
+    }
+    
+    .action-btn {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.8);
+        border: 1px solid #fff;
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .action-btn:hover {
+        background: #fff;
+        color: #000;
+        transform: scale(1.1);
+    }
+    
+    .action-btn.favorited {
+        background: #e74c3c;
+        border-color: #e74c3c;
+    }
+    
+    .action-btn.favorited:hover {
+        background: #c0392b;
+        border-color: #c0392b;
+        color: #fff;
+    }
+    
+    .action-btn.in-watchlist {
+        background: #3498db;
+        border-color: #3498db;
+    }
+    
+    .action-btn.in-watchlist:hover {
+        background: #2980b9;
+        border-color: #2980b9;
+        color: #fff;
+    }
+    
+    .movie-overview {
+        height: 60px;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+    }
+
+    .movie-card__content h5 a {
+        font-weight: 600;
+    }
+    
+    .no-poster {
+        width: 100%;
+        background: linear-gradient(45deg, #1e3c72, #2a5298);
+    }
+    
+    .page-item.active .page-link {
+        background-color: #f7b731 !important;
+        border-color: #f7b731 !important;
+        color: #000 !important;
+    }
+    
+    .page-link:hover {
+        background-color: #333 !important;
+        border-color: #666 !important;
+        color: #fff !important;
+    }
+
+    /* Input and select styling */
+    .search-input::placeholder {
+        color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    .search-input:focus {
+        background-color: #1a1a1a !important;
+        color: #fff !important;
+        border-color: #f7b731 !important;
+        box-shadow: 0 0 0 0.2rem rgba(247, 183, 49, 0.25) !important;
+    }
+
+    .genre-select:focus {
+        background-color: #1a1a1a !important;
+        color: #fff !important;
+        border-color: #f7b731 !important;
+        box-shadow: 0 0 0 0.2rem rgba(247, 183, 49, 0.25) !important;
+    }
+
+     
+    /* Style du select lui-même */
+.genre-select {
+    background-color: #fff !important; /* fond blanc pour le select */
+    color: #000 !important;            /* texte noir */
+}
+    .genre-select option {
+        background-color: #fff !important;
+        color: #000 !important;
+    }
+
+    /* Force black text in dropdown options */
+    select.genre-select option {
+        color: #000 !important;
+    }
+
+    .btn-primary {
+        background: linear-gradient(45deg, #f7b731, #f0932b);
+        border: none;
+        color: #000;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(45deg, #f0932b, #f7b731);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(247, 183, 49, 0.4);
+    }
+
+    .btn-outline-light:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: #fff;
+        color: #fff;
+    }
+
+    @media (max-width: 768px) {
+        .section-title h2 {
+            font-size: 1.8rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    // Favorite button functionality
+    $('.favorite-btn').click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const btn = $(this);
+        const movieId = btn.data('movie-id');
+        const icon = btn.find('i');
+
+        $.ajax({
+            url: "{% url 'toggle_favorite' %}",
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            contentType: 'application/json',
+            data: JSON.stringify({ 
+                film_id: movieId
+            }),
+            success: function(response) {
+                if (response.success) {
+                    if (response.is_favorite) {
+                        btn.addClass('favorited');
+                        icon.removeClass('fa-heart-o').addClass('fa-heart');
+                        btn.attr('title', 'Retirer des favoris');
+                    } else {
+                        btn.removeClass('favorited');
+                        icon.removeClass('fa-heart').addClass('fa-heart-o');
+                        btn.attr('title', 'Ajouter aux favoris');
+                    }
+                    showToast(response.message, 'success');
+                } else {
+                    showToast('Erreur lors de la mise à jour des favoris', 'error');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                showToast('Erreur lors de la mise à jour des favoris', 'error');
+            }
+        });
+    });
+    
+    // Watchlist button functionality
+    $('.watchlist-btn').click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const btn = $(this);
+        const movieId = btn.data('movie-id');
+        const icon = btn.find('i');
+
+        $.ajax({
+            url: "{% url 'toggle_watchlist' %}",
+            type: 'POST',
+            headers: { 
+                'X-CSRFToken': csrftoken 
+            },
+            contentType: 'application/json',
+            data: JSON.stringify({ 
+                movie_id: movieId 
+            }),
+            success: function(response) {
+                if (response.success) {
+                    if (response.is_in_watchlist) {
+                        btn.addClass('in-watchlist');
+                        icon.removeClass('fa-plus').addClass('fa-check');
+                        btn.attr('title', 'Retirer de la watchlist');
+                    } else {
+                        btn.removeClass('in-watchlist');
+                        icon.removeClass('fa-check').addClass('fa-plus');
+                        btn.attr('title', 'Ajouter à la watchlist');
+                    }
+                    showToast(response.message, 'success');
+                    
+                    // Update header watchlist count if element exists
+                    if ($('#watchlist-count').length) {
+                        $('#watchlist-count').text(response.watchlist_count);
+                    }
+                } else {
+                    showToast('Erreur lors de la mise à jour de la watchlist', 'error');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                showToast('Erreur lors de la mise à jour de la watchlist', 'error');
+            }
+        });
+    });
+    
+    // Toast notification function
+    function showToast(message, type) {
+        const bgColor = type === 'success' ? '#27ae60' : '#e74c3c';
+        const toast = $('<div>')
+            .css({
+                position: 'fixed',
+                top: '20px',
+                right: '20px',
+                background: bgColor,
+                color: 'white',
+                padding: '15px 25px',
+                borderRadius: '5px',
+                zIndex: 9999,
+                boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+                animation: 'slideIn 0.3s ease-out'
+            })
+            .text(message)
+            .appendTo('body');
+        
+        setTimeout(() => {
+            toast.fadeOut(300, () => toast.remove());
+        }, 3000);
+    }
+
+    // Auto-submit genre filter on change
+    $('select[name="genre"]').change(function() {
+        $(this).closest('form').submit();
+    });
+});
+</script>
+
+<style>
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+</style>
+{% endblock %}

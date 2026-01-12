@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}FilmNeo - Accueil{% endblock %}
+
+{% block content %}
+<!-- Hero Section Begin -->
+<section class="hero">
+    <div class="container">
+        <div class="hero__slider owl-carousel">
+            <div class="hero__items set-bg" data-setbg="{% static 'img/heat.png' %}">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="hero__text">
+                            <div class="label">Adventure</div>
+                            <h2>Découvrez des milliers de films</h2>
+                            <p>Explorez notre base de données de films avec Neo4j</p>
+                            {% if not user.is_authenticated %}
+                            <a href="{% url 'register' %}"><span>S'inscrire gratuitement</span> <i class="fa fa-angle-right"></i></a>
+                            {% else %}
+                            <a href="{% url 'movies_list' %}"><span>Voir les films</span> <i class="fa fa-angle-right"></i></a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Add more slides as needed -->
+        </div>
+    </div>
+</section>
+<!-- Hero Section End -->
+
+<!-- Features Section -->
+<section class="features spad" id="features">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="section-title">
+                    <h2>Fonctionnalités</h2>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-4 col-md-6">
+                <div class="feature__item">
+                    <i class="fa fa-film"></i>
+                    <h5>Base de données riche</h5>
+                    <p>Des milliers de films avec détails complets</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="feature__item">
+                    <i class="fa fa-heart"></i>
+                    <h5>Favoris personnels</h5>
+                    <p>Sauvegardez vos films préférés</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="feature__item">
+                    <i class="fa fa-search"></i>
+                    <h5>Recherche avancée</h5>
+                    <p>Trouvez des films par acteurs, réalisateurs, genres</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Popular Movies Section -->
+<section class="product spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="section-title">
+                    <h4>Films Populaires</h4>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <!-- Movies will be populated here -->
+            {% for movie in popular_movies %}
+            <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="product__item">
+                    <div class="product__item__pic set-bg" data-setbg="{{ movie.poster_url }}">
+                        <div class="view"><i class="fa fa-eye"></i> {{ movie.views }}</div>
+                    </div>
+                    <div class="product__item__text">
+                        <ul>
+                            <li>{{ movie.genre }}</li>
+                        </ul>
+                        <h5><a href="{% url 'movie_detail' movie.id %}">{{ movie.title }}</a></h5>
+                        <span>{{ movie.year }}</span>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-lg-12">
+                <p class="text-center">Aucun film disponible pour le moment.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

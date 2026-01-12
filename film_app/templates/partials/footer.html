@@ -1,0 +1,41 @@
+{% load static %}
+<footer class="footer">
+    <div class="page-up">
+        <a href="#" id="scrollToTopButton"><span class="arrow_carrot-up"></span></a>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="footer__logo">
+                    <a href="{% url 'home' %}"><img src="{% static 'img/logo.png' %}" alt="FilmNeo"></a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="footer__nav">
+                    <ul>
+                        <li><a href="{% url 'home' %}">Accueil</a></li>
+                        {% if user.is_authenticated %}
+                            {% if user.is_admin %}
+                                <li><a href="{% url 'admin_dashboard' %}">Admin Panel</a></li>
+                            {% else %}
+                                <li><a href="{% url 'user_dashboard' %}">Dashboard</a></li>
+                            {% endif %}
+                            <li><a href="{% url 'favorites' %}">Favoris</a></li>
+                        {% else %}
+                            <li><a href="{% url 'login' %}">Connexion</a></li>
+                            <li><a href="{% url 'register' %}">Inscription</a></li>
+                        {% endif %}
+                        <li><a href="{% url 'about' %}">À propos</a></li>
+                        <li><a href="{% url 'contact' %}">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <p>
+                    &copy; {% now "Y" %} FilmNeo. Tous droits réservés.
+                    <br>Powered by Django & Neo4j
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>

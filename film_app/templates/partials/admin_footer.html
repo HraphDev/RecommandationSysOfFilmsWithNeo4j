@@ -1,0 +1,31 @@
+<!-- templates/partials/admin_footer.html -->
+<footer class="footer">
+    <div class="page-up">
+        <a href="#" id="scrollToTopButton"><span class="arrow_carrot-up"></span></a>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="footer__logo">
+                    <a href="{% url 'admin_dashboard' %}"><img src="{% static 'img/logo.png' %}" alt="FilmNeo Admin"></a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="footer__nav">
+                    <ul>
+                        <li><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                        <li><a href="{% url 'admin_users' %}">Utilisateurs</a></li>
+                        <li><a href="#">Films</a></li>
+                        <li><a href="{% url 'user_dashboard' %}">Site Public</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <p>
+                    &copy; {% now "Y" %} FilmNeo - Panel Admin
+                    <br>Connecté en tant que: {{ user.username }}
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>

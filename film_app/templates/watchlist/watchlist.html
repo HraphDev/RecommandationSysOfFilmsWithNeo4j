@@ -1,0 +1,473 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Ma Watchlist - FilmNeo{% endblock %}
+
+{% block content %}
+<!-- Watchlist Section Begin -->
+<section class="watchlist-section spad">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="row mb-5">
+            <div class="col-lg-12">
+                <div class="section-title">
+                    <h2 class="text-white">
+                        <i class="fa fa-bookmark text-primary me-3"></i>
+                        Ma Watchlist
+                        <span class="badge bg-primary ms-3">{{ watchlist_count }}</span>
+                    </h2>
+                    <p class="mt-2 text-white">Films à regarder plus tard</p>
+                </div>
+            </div>
+        </div>
+
+        {% if watchlist_movies %}
+        <!-- Watchlist Grid -->
+        <div class="row">
+            {% for movie in watchlist_movies %}
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-4">
+                <div class="movie-card">
+                    <div class="movie-card__poster">
+                        <a href="{% url 'movie_detail' movie.id %}">
+                            {% if movie.poster_url %}
+                            <img src="{{ movie.poster_url }}" 
+                                 alt="{{ movie.title }}" 
+                                 class="img-fluid rounded">
+                            {% else %}
+                            <div class="no-poster bg-dark text-center p-4 rounded d-flex align-items-center justify-content-center" 
+                                 style="height: 400px;">
+                                <div>
+                                    <i class="fa fa-film fa-3x text-muted"></i>
+                                    <p class="mt-2 text-white">Affiche non disponible</p>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </a>
+                        
+                        <!-- Movie Rating -->
+                        <div class="movie-rating">
+                            <span class="rating-badge {% if movie.rating >= 7.5 %}high{% elif movie.rating >= 5 %}medium{% else %}low{% endif %}">
+                                {{ movie.rating }}
+                            </span>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="movie-actions">
+                            <button class="action-btn favorite-btn" 
+                                    data-movie-id="{{ movie.id }}"
+                                    title="Ajouter aux favoris">
+                                <i class="fa fa-heart-o"></i>
+                            </button>
+                            <button class="action-btn remove-watchlist-btn in-watchlist" 
+                                    data-movie-id="{{ movie.id }}"
+                                    title="Retirer de la watchlist">
+                                <i class="fa fa-check"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="movie-card__content mt-3">
+                        <h5 class="mb-1">
+                            <a href="{% url 'movie_detail' movie.id %}" class="text-decoration-none text-white">
+                                {{ movie.title|truncatechars:40 }}
+                            </a>
+                        </h5>
+                        
+                        <div class="movie-meta d-flex justify-content-between mb-2">
+                            {% if movie.year %}
+                            <span class="text-white-50">
+                                <i class="fa fa-calendar me-1"></i>{{ movie.year }}
+                            </span>
+                            {% endif %}
+                            <span class="text-primary">
+                                <i class="fa fa-star me-1"></i>{{ movie.rating }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="row mt-5">
+            <div class="col-lg-12 text-center">
+                <a href="{% url 'movies_list' %}" class="btn btn-primary btn-lg">
+                    <i class="fa fa-search me-2"></i>Découvrir plus de films
+                </a>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- Empty State -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="empty-watchlist text-center py-5">
+                    <div class="empty-icon mb-4">
+                        <i class="fa fa-bookmark-o" style="font-size: 120px; color: #3498db; opacity: 0.3;"></i>
+                    </div>
+                    <h3 class="text-white mb-3">Votre watchlist est vide</h3>
+                    <p class="text-white-50 mb-4">
+                        Ajoutez des films à votre watchlist pour ne pas les oublier
+                    </p>
+                    <a href="{% url 'movies_list' %}" class="btn btn-primary btn-lg">
+                        <i class="fa fa-film me-2"></i>Parcourir les films
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+<!-- Watchlist Section End -->
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .watchlist-section {
+        min-height: 70vh;
+        padding: 50px 0;
+    }
+
+    .section-title h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .section-title h2 .badge {
+        font-size: 1.2rem;
+        padding: 8px 15px;
+    }
+
+    .section-title p {
+        font-size: 1.1rem;
+        opacity: 0.8;
+    }
+
+    .movie-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+        height: 100%;
+    }
+    
+    .movie-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(52, 152, 219, 0.3);
+    }
+    
+    .movie-card__poster {
+        position: relative;
+        overflow: hidden;
+        border-radius: 8px;
+    }
+    
+    .movie-card__poster img {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+        transition: transform 0.5s;
+    }
+    
+    .movie-card:hover .movie-card__poster img {
+        transform: scale(1.05);
+    }
+    
+    .rating-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.9rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+    
+    .rating-badge.high {
+        background: linear-gradient(45deg, #f7b731, #f0932b);
+        color: #000;
+    }
+    
+    .rating-badge.medium {
+        background: linear-gradient(45deg, #686de0, #4834d4);
+        color: #fff;
+    }
+    
+    .rating-badge.low {
+        background: linear-gradient(45deg, #eb4d4b, #ff7979);
+        color: #fff;
+    }
+    
+    .movie-actions {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        display: flex;
+        gap: 5px;
+    }
+    
+    .movie-card:hover .movie-actions {
+        opacity: 1;
+    }
+    
+    .action-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.8);
+        border: 1px solid #fff;
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .action-btn:hover {
+        background: #fff;
+        color: #000;
+        transform: scale(1.1);
+    }
+    
+    .action-btn.favorited {
+        background: #e74c3c;
+        border-color: #e74c3c;
+    }
+    
+    .action-btn.favorited:hover {
+        background: #c0392b;
+        border-color: #c0392b;
+        color: #fff;
+    }
+    
+    .action-btn.in-watchlist {
+        background: #3498db;
+        border-color: #3498db;
+    }
+    
+    .action-btn.in-watchlist:hover {
+        background: #2980b9;
+        border-color: #2980b9;
+        color: #fff;
+    }
+    
+    .empty-watchlist {
+        background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(155, 89, 182, 0.1));
+        border-radius: 15px;
+        border: 2px dashed rgba(52, 152, 219, 0.3);
+        padding: 60px 30px;
+    }
+
+    .empty-icon {
+        animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-20px);
+        }
+    }
+
+    .no-poster {
+        width: 100%;
+        background: linear-gradient(45deg, #1e3c72, #2a5298);
+    }
+
+    .btn-primary {
+        background: linear-gradient(45deg, #3498db, #2980b9);
+        border: none;
+        padding: 12px 30px;
+        transition: all 0.3s;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(45deg, #2980b9, #3498db);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(52, 152, 219, 0.4);
+    }
+
+    .movie-meta .text-primary {
+        font-weight: 600;
+    }
+
+    .movie-card__content h5 a {
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .section-title h2 {
+            font-size: 1.8rem;
+            flex-direction: column;
+        }
+        
+        .section-title h2 .badge {
+            margin-top: 10px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    // Favorite button functionality
+    $('.favorite-btn').click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const btn = $(this);
+        const movieId = btn.data('movie-id');
+        const icon = btn.find('i');
+
+        $.ajax({
+            url: "{% url 'toggle_favorite' %}",
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            contentType: 'application/json',
+            data: JSON.stringify({ 
+                film_id: movieId
+            }),
+            success: function(response) {
+                if (response.success) {
+                    if (response.is_favorite) {
+                        btn.addClass('favorited');
+                        icon.removeClass('fa-heart-o').addClass('fa-heart');
+                        btn.attr('title', 'Retirer des favoris');
+                    } else {
+                        btn.removeClass('favorited');
+                        icon.removeClass('fa-heart').addClass('fa-heart-o');
+                        btn.attr('title', 'Ajouter aux favoris');
+                    }
+                    showToast(response.message, 'success');
+                } else {
+                    showToast('Erreur lors de la mise à jour des favoris', 'error');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                showToast('Erreur lors de la mise à jour des favoris', 'error');
+            }
+        });
+    });
+
+    // Remove from watchlist functionality
+    $('.remove-watchlist-btn').click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const btn = $(this);
+        const movieId = btn.data('movie-id');
+        const movieCard = btn.closest('.col-xl-3, .col-lg-4, .col-md-6, .col-sm-6');
+
+        // Confirm before removing
+        if (confirm('Voulez-vous vraiment retirer ce film de votre watchlist ?')) {
+            $.ajax({
+                url: "{% url 'toggle_watchlist' %}",
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                contentType: 'application/json',
+                data: JSON.stringify({ 
+                    movie_id: movieId
+                }),
+                success: function(response) {
+                    if (response.success) {
+                        // Animate removal
+                        movieCard.fadeOut(400, function() {
+                            $(this).remove();
+                            
+                            // Update count
+                            const currentCount = parseInt($('.badge').text());
+                            $('.badge').text(currentCount - 1);
+                            
+                            // Check if no more items in watchlist
+                            if ($('.movie-card').length === 0) {
+                                location.reload();
+                            }
+                        });
+                        
+                        showToast('Film retiré de la watchlist', 'success');
+                    } else {
+                        showToast('Erreur lors de la suppression', 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    showToast('Erreur lors de la suppression', 'error');
+                }
+            });
+        }
+    });
+    
+    // Toast notification function
+    function showToast(message, type) {
+        const bgColor = type === 'success' ? '#27ae60' : '#e74c3c';
+        const toast = $('<div>')
+            .css({
+                position: 'fixed',
+                top: '20px',
+                right: '20px',
+                background: bgColor,
+                color: 'white',
+                padding: '15px 25px',
+                borderRadius: '5px',
+                zIndex: 9999,
+                boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+                animation: 'slideIn 0.3s ease-out'
+            })
+            .text(message)
+            .appendTo('body');
+        
+        setTimeout(() => {
+            toast.fadeOut(300, () => toast.remove());
+        }, 3000);
+    }
+});
+</script>
+
+<style>
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+</style>
+{% endblock %}
