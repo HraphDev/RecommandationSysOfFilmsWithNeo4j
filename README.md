@@ -30,36 +30,6 @@
 | 🛠️ | **Admin dashboard** | Manage users, activate/deactivate accounts, grant or revoke admin rights |
 | 🔌 | **REST API** | JSON endpoints for movies, credits, keywords, similar movies and ratings |
 
----
-
-## 📸 Screenshots
-
-### Home & Browse
-| Home | Movies list |
-|:---:|:---:|
-| ![Home](docs/screenshots/01-home.png) | ![Movies](docs/screenshots/02-movies.png) |
-
-### Movie details & similar movies
-| Details | Similar movies |
-|:---:|:---:|
-| ![Details](docs/screenshots/03-movie-detail.png) | ![Similar](docs/screenshots/04-similar-movies.png) |
-
-### Personalized experience
-| Favorites | Watchlist |
-|:---:|:---:|
-| ![Favorites](docs/screenshots/05-favorites.png) | ![Watchlist](docs/screenshots/06-watchlist.png) |
-
-| User dashboard (recommendations) | Login / Register |
-|:---:|:---:|
-| ![Dashboard](docs/screenshots/07-user-dashboard.png) | ![Auth](docs/screenshots/08-auth.png) |
-
-### Admin & Graph
-| Admin dashboard | Neo4j graph (Browser) |
-|:---:|:---:|
-| ![Admin](docs/screenshots/09-admin-dashboard.png) | ![Graph](docs/screenshots/10-neo4j-graph.png) |
-
----
-
 ## 🧠 How the recommendation works
 
 ```mermaid
